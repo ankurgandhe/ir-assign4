@@ -1,0 +1,29 @@
+from ReadData import * 
+import scipy.sparse.linalg
+
+if __name__ == '__main__':
+    if len(sys.argv)<3:
+        print >> sys.stderr, " usage : python main.py <TransitionMatrix-File> <alpha>"
+        sys.exit(0)
+    TMatrixFile = sys.argv[1]
+    alpha = float(sys.argv[2])
+    print >> sys.stderr, "Reading Transition Matrix file:", TMatrixFile
+    TransitionMatrix = ReadTransitionMatrix(TMatrixFile)
+    N_docs = int(TransitionMatrix.get_shape()[0])
+    print >> sys.stderr,"Read ", N_docs," documents... Creating Teleportation Matrix"
+    TeleportationMatrix = GetTeleportationMatrix(N_docs,N_docs,N_docs)
+    B = CreatePageRankMatrix(TransitionMatrix, TeleportationMatrix,alpha)
+    #CheckSparseMatrix(B)
+    #print >> sys.stderr, B.get_shape()
+    print >> sys.stderr, B.sum()
+    print >> sys.stderr, "Creating page rank vector"
+    r = GetPageRank(B,"iterate")
+    print >> sys.stderr, r.get_shape()
+    r = r.todense()
+    print >> sys.stderr, r.shape
+    print >> sys.stderr, max(r)
+    (lam,v) = scipy.sparse.linalg.eigs(B,k=1,which='LM')
+    print lam
+#    for i in range(len(r)):
+#    	print r[i]
+    
