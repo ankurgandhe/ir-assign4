@@ -1,0 +1,28 @@
+import sys
+
+def RankIndriFile(FileName,PageRank):
+    try:
+        FileName=FileName.strip()
+        uid=int(FileName.split('-')[0])
+        qid = int(FileName.split('-')[1].split('.')[0])
+        RankList = []
+        for l in open(FileName):
+            l=l.strip().split()
+            docid = int(l[2])
+            score = int(l[4])
+            NewScore = ScorePageRank(uid,docid,score,PageRank,1)
+            RankList.append((NewScore,docid))
+        
+        return (uid,qid,RankList)
+            
+    except IOError as e:
+        print "I/O error({0}): {1}".format(e.errno, e.strerror)
+
+def ScorePageRank(uid,docid,qscore,PageRank,algo):
+    FinalScore =0
+    if algo==1:
+        lambda1=0.5
+        prscore = log10(PageRank[docid-1])
+        FinalScore = lambda1*FinalScore + (1-lambda1)*prscore 
+    return FinalScore
+    

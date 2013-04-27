@@ -1,12 +1,36 @@
 from ReadData import * 
+from RankDocuments import * 
 import scipy.sparse.linalg
+import os
+
+def PrintRankList(PageRankVector,indri_dir):
+    no_files=0
+    for files in os.listdir(indri_dir):
+        if files.endswith(".txt"):
+            uid,qid,RankList = RankIndriFile(indri_dir+'/'+files,PageRankVector)
+            PrintTrecFormat(uid,qid,RankList)
+            no_files = no_files+1
+    print >> sys.stderr, "Read",no_files,"files."
+    
+    
+def PrintTrecFormat(uid,qid,RankList):
+    rank=1
+    for score,docid in RankList:
+        print str(uid)+'-'+str(qid),'Q0',docid,rank,score,"pagerank"
+        rank = rank+1
+        if rank>100:
+            break
+    return 1
+
+
 
 if __name__ == '__main__':
-    if len(sys.argv)<3:
-        print >> sys.stderr, " usage : python main.py <TransitionMatrix-File> <alpha>"
+    if len(sys.argv)<4:
+        print >> sys.stderr, " usage : python main.py <TransitionMatrix-File> <alpha> <indri-files-dir>"
         sys.exit(0)
     TMatrixFile = sys.argv[1]
     alpha = float(sys.argv[2])
+    indri_dir = sys.argv[3]
 
     print >> sys.stderr, "Reading Transition Matrix file:", TMatrixFile
     TransitionMatrix,doclist = ReadTransitionMatrix(TMatrixFile)
@@ -23,6 +47,7 @@ if __name__ == '__main__':
     print >> sys.stderr, r.shape
     print >> sys.stderr, sum(r)
     
+    PrintRankList(r,indri_dir)
     
     #B = CreatePageRankMatrix(TransitionMatrix, TeleportationMatrix,alpha)
     #(lam,r) = scipy.sparse.linalg.eigs(B,k=1,which='LM')
