@@ -23,8 +23,8 @@ def RankIndriFile(FileName,PageRank):
 def ScorePageRank(uid,docid,qscore,PageRank,algo):
     FinalScore =0
     if algo==1:
-        lambda1=0.5
+        lambda1=0
         prscore = math.log10(PageRank[docid-1])
-        FinalScore = lambda1*qscore + (1-lambda1)*prscore 
+        FinalScore = (1-lambda1)*qscore + lambda1*prscore 
     return FinalScore
     
