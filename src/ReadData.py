@@ -64,7 +64,7 @@ def GetTeleportationMatrix(nrows, ncols, N,doclist,alpha):
         if idx in doclist:
             data.append(1./N)
         else:
-            data.append(1./(N))
+            data.append(1./(alpha*N))
     I = numpy.asarray(i)
     J = numpy.asarray(j)
     Data = numpy.asarray(data)
