@@ -1,4 +1,4 @@
-from ReadData import * 
+from PageRank import * 
 from RankDocuments import * 
 import scipy.sparse.linalg
 import os
