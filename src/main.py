@@ -44,8 +44,8 @@ if __name__ == '__main__':
     r = GetPageRank(TransitionMatrix,TeleportationMatrix,alpha,"iterate")
     
     r = r.todense()
-    print >> sys.stderr, r.shape
-    print >> sys.stderr, sum(r)
+    print >> sys.stderr, "Size of PageRank Matrix:", r.shape
+    print >> sys.stderr, "Sum of all elements of PageRank matrix:",sum(r)
     
     PrintRankList(r,indri_dir)
     
