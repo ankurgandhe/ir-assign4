@@ -24,7 +24,7 @@ def ScorePageRank(uid,docid,qscore,PageRank,algo):
     FinalScore =0
     if algo==1:
         lambda1=0.2
-        prscore = PageRank[docid-1]#math.log10(PageRank[docid-1])
+        prscore = float(PageRank[docid-1])#math.log10(PageRank[docid-1])
         FinalScore = (1-lambda1)*qscore + lambda1*prscore 
     return FinalScore
     
