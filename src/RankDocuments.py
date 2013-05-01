@@ -2,7 +2,7 @@ import sys
 import math
 
 def RankIndriFile(FileName,PageRank):
-    print >> sys.stderr, "Reading file:",FileName
+    #print >> sys.stderr, "Reading file:",FileName
     try:
         Name=FileName.strip().split('/')[-1]
         uid=int(Name.split('-')[0])
@@ -23,8 +23,8 @@ def RankIndriFile(FileName,PageRank):
 def ScorePageRank(uid,docid,qscore,PageRank,algo):
     FinalScore =0
     if algo==1:
-        lambda1=0.4
-        prscore = math.log10(PageRank[docid-1])
+        lambda1=0.2
+        prscore = PageRank[docid-1]#math.log10(PageRank[docid-1])
         FinalScore = (1-lambda1)*qscore + lambda1*prscore 
     return FinalScore
     

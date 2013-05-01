@@ -3,6 +3,7 @@ import scipy
 import scipy.sparse
 import numpy 
 import math 
+from scipy import linalg
 # Read Transition matrix given in sparse format
 def ReadTransitionMatrix(FileName):
     item=0
@@ -31,7 +32,7 @@ def ReadTransitionMatrix(FileName):
             if i[idx] not in n_i:
                 print >> sys.stderr, i[idx],": 0"
                 continue 
-	    data[idx] = data[idx]/n_i[i[idx]]
+	    data[idx] = float(data[idx])/n_i[i[idx]]
 
         I = numpy.asarray(i)
         J = numpy.asarray(j)
@@ -57,9 +58,9 @@ def GetTeleportationMatrix(nrows, ncols, N,doclist,alpha):
         i.append(idx)
         j.append(0)
         if idx in doclist:
-            data.append(1./N)
+            data.append(1./(N))
         else:
-            data.append(1./N)  #(alpha*N))
+            data.append(1./N) #(alpha*(N)))
     I = numpy.asarray(i)
     J = numpy.asarray(j)
     Data = numpy.asarray(data)
@@ -81,30 +82,62 @@ def GetPageRank(TransitionMatrix,TeleportationMatrix,alpha,method):
     Mt = TransitionMatrix.transpose()
     p0 = TeleportationMatrix 
     # Initialize Convergence Condition, number of documents and pagerank vector 
-    epsilon = 0.00000001
+    epsilon = 1e-5; 
     iter = 0
     n_docs = int(Mt.get_shape()[0])
-    # initialize pagerank vector such that sum(r) = 1
-    r = scipy.sparse.coo_matrix(([1],([0],[0])),shape=(n_docs,1))
-
+    # initialize pageranki vector such that sum(r) = 1
+    r = numpy.ones((n_docs,1))/n_docs
+    r = scipy.sparse.coo_matrix(r)
+    #r = scipy.sparse.coo_matrix(([1],([0],[0])),shape=(n_docs,1))
+    
     print >> sys.stderr, "initial vector is of shape: ", r.shape, "and sums to", r.sum()
     
     if method=="iterate":
         conv=False
         while not conv:
-            rold = r
-            r =  (1-alpha)*Mt* rold + alpha*p0
-	    diff = numpy.sum(numpy.absolute((rold.todense() - r.todense())))
-            if diff <=epsilon:
+            r_old = r
+            r =  (1-alpha)*Mt* r_old + alpha*p0
+	    diff = numpy.sum(numpy.absolute((r_old.todense() - r.todense())))
+            if diff <= epsilon:
                 conv=True
 	    iter = iter+1
 	    if iter%10==0:
 		print >> sys.stderr,iter,"...",
-    print >> sys.stderr, "Finished calculating PageRank at iteration:", str(iter),"with difference:",str(diff)
+            if iter>100:
+                break
+        print >> sys.stderr, "Finished calculating PageRank at iteration:", str(iter),"with difference:",str(diff)
+
+    elif method=="inverse":
+        I = scipy.sparse.identity(n_docs, dtype='float', format='coo')
+        X = I - (1-alpha)*Mt
+        print >> sys.stderr, X.get_shape()
+        X = X.tocsr()
+        #X_1 = linalg.inv(X.tocsr)
+        
+        r = alpha * X_1 * p0
+        print >> sys.stderr, "Finished calculating PageRank at inverse"
     return r 
+
                   
            
 def CheckSparseMatrix(M):
-    M = M.todense()
-    for i in range(len(M)):
-        print >> sys.stderr, sum(M[ii])
+    sumM = M.sum(1)
+    n_ones =0
+    n_zeros=0
+    n_other = 0 
+    for i in range(len(sumM)):
+        if float(sumM[i])>=0 and  float(sumM[i]) < 0.0000001 :
+            n_zeros = n_zeros+1
+        elif float(sumM[i])>0.9995 and  float(sumM[i]) < 1.0005:
+            n_ones = n_ones +1 
+        else:
+            n_other = n_other + 1
+
+    print >> sys.stderr, 'No of Ones:', n_ones, "number of zeros:",n_zeros,"number of other:",n_other 
+
+def identity_coo(N):
+    row = arange(N, dtype='intc')
+    col = arange(N, dtype='intc')
+    data = ones(N)
+    I = coo_matrix((data,(row,col)), shape=(N,N))
+    return I
